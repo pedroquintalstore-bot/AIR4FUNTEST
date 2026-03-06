@@ -51,12 +51,35 @@
                 </div>
             </div>
 
-            <section class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 mb-6 text-center">
-                <h3 class="font-black text-slate-800 text-sm uppercase italic mb-4">📅 Consulta de Datas</h3>
-                <div class="calendar-wrapper">
-                    <iframe src="https://calendar.google.com/calendar/embed?src=f01caf138ac3fa8373776898f3b8e1ca8382de93f3471bee82a7285bee9eb1a1%40group.calendar.google.com&ctz=Europe%2FLisbon&mode=AGENDA&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0" style="border:0"></iframe>
-                </div>
-            </section>
+         <section class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 mb-6 text-center">
+
+<h3 class="font-black text-slate-800 text-sm uppercase italic mb-4">
+📅 Disponibilidade
+</h3>
+
+<div class="flex justify-between items-center mb-4">
+<button onclick="mesAnterior()" class="text-blue-600 font-black">◀</button>
+<h4 id="mesAtual" class="font-black uppercase text-xs"></h4>
+<button onclick="mesSeguinte()" class="text-blue-600 font-black">▶</button>
+</div>
+
+<div id="calendar" class="grid grid-cols-7 gap-2 text-[10px] font-bold"></div>
+
+<div class="flex justify-center gap-6 mt-6 text-[10px] font-bold uppercase">
+
+<div class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-500 rounded"></div>
+<span>Disponível</span>
+</div>
+
+<div class="flex items-center gap-2">
+<div class="w-4 h-4 bg-red-500 rounded"></div>
+<span>Reservado</span>
+</div>
+
+</div>
+
+</section>
 
             <section class="bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl text-white relative overflow-hidden" x-data="{ enviado: false, loading: false }">
                 <h3 class="text-xl font-black italic uppercase mb-6">Registo de Contrato</h3>
@@ -138,7 +161,72 @@
     <footer class="fixed bottom-0 left-0 right-0 p-4 glass border-t border-slate-200 text-center z-40">
         <p class="text-[7px] font-bold text-slate-300 uppercase tracking-widest italic">© 2026 Air4Fun Madeira | Diversão Segura</p>
     </footer>
+    <script>
+
+const calendarId = "f01caf138ac3fa8373776898f3b8e1ca8382de93f3471bee82a7285bee9eb1a1@group.calendar.google.com"
+
+let dataAtual = new Date()
+let reservas = []
+
+async function carregarReservas(){
+
+const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?singleEvents=true&orderBy=startTime`
+
+const res = await fetch(url)
+const data = await res.json()
+
+reservas = data.items.map(e => e.start.date || e.start.dateTime?.split("T")[0])
+
+gerarCalendario()
+
+}
+
+function gerarCalendario(){
+
+const calendar = document.getElementById("calendar")
+calendar.innerHTML = ""
+
+const ano = dataAtual.getFullYear()
+const mes = dataAtual.getMonth()
+
+const diasMes = new Date(ano, mes+1, 0).getDate()
+
+const nomeMes = dataAtual.toLocaleString('pt-PT', {month:'long', year:'numeric'})
+document.getElementById("mesAtual").innerText = nomeMes
+
+for(let i=1;i<=diasMes;i++){
+
+const data = `${ano}-${String(mes+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`
+
+const ocupado = reservas.includes(data)
+
+const el = document.createElement("div")
+
+el.className = `p-3 rounded-lg text-white ${ocupado ? 'bg-red-500' : 'bg-green-500'}`
+
+el.innerText = i
+
+calendar.appendChild(el)
+
+}
+
+}
+
+function mesAnterior(){
+dataAtual.setMonth(dataAtual.getMonth()-1)
+gerarCalendario()
+}
+
+function mesSeguinte(){
+dataAtual.setMonth(dataAtual.getMonth()+1)
+gerarCalendario()
+}
+
+carregarReservas()
+
+</script>
 </body>
 
 </html>
+
 
