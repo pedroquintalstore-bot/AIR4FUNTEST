@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air4Fun | Insufláveis Profissionais</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .btn-primary { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); }
+        [x-cloak] { display: none !important; }
+        .calendar-wrapper { position: relative; padding-bottom: 100%; height: 0; overflow: hidden; border-radius: 1.5rem; border: 2px solid #eff6ff; }
+        .calendar-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-900" x-data="{ view: 'catalog', nome: '', data_festa: '', showTermos: false }">
+
+    <header class="glass sticky top-0 z-50 border-b border-slate-200 px-4 py-3">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="https://i.ibb.co/4wtgNVv1/d3c50adb-ccf9-4e86-97f8-1ce14f5e42d5.jpg" class="h-10 w-10 rounded-lg shadow-sm object-cover">
+                <h1 class="font-black text-xl tracking-tighter italic text-blue-800 uppercase">AIR4FUN</h1>
+            </div>
+            <nav class="flex bg-slate-100 p-1 rounded-full text-[9px] font-black uppercase">
+                <button @click="view = 'catalog'" :class="view === 'catalog' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'" class="px-3 py-2 rounded-full transition-all">Reserva</button>
+                <button @click="view = 'about'" :class="view === 'about' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'" class="px-3 py-2 rounded-full transition-all">Sobre</button>
+                <button @click="view = 'security'" :class="view === 'security' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'" class="px-3 py-2 rounded-full transition-all">Segurança</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto p-4 space-y-6 pb-32">
+        <div x-show="view === 'catalog'" x-transition>
+            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden mb-6">
+                <video class="w-full h-64 object-cover" autoplay loop muted playsinline>
+                    <source src="https://i.imgur.com/uWWEevl.mp4" type="video/mp4">
+                </video>
+                <div class="p-6">
+                    <h2 class="text-2xl font-black text-slate-800 uppercase italic leading-none mb-1">Combo Stitch & Angel</h2>
+                    <p class="text-xl font-bold text-blue-600 mb-4">100€ / Dia</p>
+                    <div class="bg-blue-50 p-4 rounded-2xl mb-6 border-2 border-dashed border-blue-200 text-[11px] font-bold text-blue-900 uppercase leading-relaxed space-y-1">
+                        <p>✅ Equipamento certificado (Normas UE).</p>
+                        <p>✅ Caução: 30% do valor diário.</p>
+                        <p>✅ Alerta Amarelo/Vermelho: Reagendamento sem custo.</p>
+                    </div>
+                </div>
+            </div>
+
+            <section class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 mb-6 text-center">
+                <h3 class="font-black text-slate-800 text-sm uppercase italic mb-4">📅 Consulta de Datas</h3>
+                <div class="calendar-wrapper">
+                    <iframe src="https://calendar.google.com/calendar/embed?src=f01caf138ac3fa8373776898f3b8e1ca8382de93f3471bee82a7285bee9eb1a1%40group.calendar.google.com&ctz=Europe%2FLisbon&mode=AGENDA&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0" style="border:0"></iframe>
+                </div>
+            </section>
+
+            <section class="bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl text-white relative overflow-hidden" x-data="{ enviado: false, loading: false }">
+                <h3 class="text-xl font-black italic uppercase mb-6">Registo de Contrato</h3>
+                <div x-show="enviado" class="bg-blue-600 p-6 rounded-2xl text-center font-bold mb-4">✅ PEDIDO ENVIADO!</div>
+                <form x-show="!enviado" @submit.prevent="loading = true; fetch('https://script.google.com/macros/s/AKfycbx-UJRbAlyC_DQOXYXDSDlsdw_O85gBpHCWWOcTshp8CaRhZG4AVpoWjxCH8AAyNs-5/exec', {method: 'POST', mode: 'no-cors', body: JSON.stringify({nome: nome, email: $el.email.value, telefone: $el.telefone.value, data_evento: data_festa, morada: $el.morada.value, piso: $el.piso.value, valor_caucao: '30', valor_total: '100'})}).then(() => { loading = false; enviado = true; })" class="space-y-4">
+                    <input type="text" x-model="nome" placeholder="NOME DO RESPONSÁVEL" required class="w-full p-4 rounded-xl bg-white/10 border border-white/5 text-white placeholder:text-slate-500 font-bold text-xs uppercase outline-none">
+                    <input type="email" name="email" placeholder="EMAIL PARA CONTRATO" required class="w-full p-4 rounded-xl bg-white/10 border border-white/5 text-white placeholder:text-slate-500 font-bold text-xs uppercase outline-none">
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="tel" name="telefone" placeholder="TELEMÓVEL" required class="w-full p-4 rounded-xl bg-white/10 border border-white/5 text-white placeholder:text-slate-500 font-bold text-xs uppercase outline-none">
+                        <input type="date" x-model="data_festa" required class="w-full p-4 rounded-xl bg-white/10 border border-white/5 text-white placeholder:text-slate-500 font-bold text-xs uppercase outline-none">
+                    </div>
+                    <input type="text" name="morada" placeholder="MORADA DE ENTREGA" required class="w-full p-4 rounded-xl bg-white/10 border border-white/5 text-white placeholder:text-slate-500 font-bold text-xs uppercase outline-none">
+                    <select name="piso" required class="w-full p-4 rounded-xl bg-white/10 border border-white/5 text-slate-300 font-bold text-xs uppercase outline-none">
+                        <option value="" disabled selected>TIPO DE PISO</option>
+                        <option value="relva">Relva</option>
+                        <option value="cimento">Cimento</option>
+                        <option value="interior">Espaço Interior</option>
+                    </select>
+                    <div class="flex items-start gap-2 pt-2">
+                        <input type="checkbox" required class="mt-1">
+                        <label class="text-[9px] text-white font-bold uppercase italic opacity-70">
+                            Li e aceito as <button type="button" @click="showTermos = true" class="underline text-blue-400">condições de segurança</button>.
+                        </label>
+                    </div>
+                    <button type="submit" :disabled="loading" class="btn-primary w-full py-5 rounded-2xl font-black uppercase italic text-sm tracking-widest shadow-xl">
+                        <span x-show="!loading">SUBMETER RESERVA</span>
+                        <span x-show="loading"><i class="fas fa-spinner animate-spin"></i></span>
+                    </button>
+                </form>
+            </section>
+        </div>
+
+        <div x-show="view === 'about'" x-transition class="space-y-4">
+            <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200">
+                <h2 class="text-2xl font-black text-blue-600 uppercase italic mb-4">Sobre Nós</h2>
+                <p class="text-xs font-bold text-slate-600 uppercase italic leading-relaxed mb-4">Somos 4 amigos unidos por um objetivo: levar a melhor diversão à Madeira. Na Air4Fun, não alugamos apenas insufláveis; criamos momentos inesquecíveis com a máxima segurança e profissionalismo que os nossos filhos também mereceriam.</p>
+                <div class="bg-slate-50 p-4 rounded-xl text-center font-black text-blue-800 text-[10px] uppercase italic">🚀 Air4Fun - A diversão levada a sério.</div>
+            </div>
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200">
+                <h3 class="font-black text-slate-800 text-sm uppercase italic mb-4">Perguntas Frequentes</h3>
+                <div class="space-y-4 text-[10px] font-bold uppercase italic text-slate-500">
+                    <div class="border-b pb-2"><p class="text-blue-600">E se chover?</p><p>Avisando com 48h, reagendamos sem custos adicionais.</p></div>
+                    <div class="border-b pb-2"><p class="text-blue-600">O que é preciso?</p><p>Apenas uma tomada a menos de 20 metros.</p></div>
+                    <div class="pb-2"><p class="text-blue-600">Montagem e desmontagem?</p><p>Tratamos de tudo. O valor já inclui o serviço.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="view === 'security'" x-transition class="space-y-4">
+            <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200">
+                <h2 class="text-2xl font-black text-blue-600 uppercase italic mb-6">Segurança Total</h2>
+                <div class="space-y-5">
+                    <div class="flex gap-4"><i class="fas fa-biohazard text-blue-600 text-xl"></i><p class="text-[10px] font-bold uppercase italic text-slate-600 leading-tight"><b>Higiene:</b> Desinfeção profunda com produtos certificados após cada uso.</p></div>
+                    <div class="flex gap-4"><i class="fas fa-wind text-blue-600 text-xl"></i><p class="text-[10px] font-bold uppercase italic text-slate-600 leading-tight"><b>Ventos:</b> Monitorização constante. Suspensão imediata se ventos > 38km/h.</p></div>
+                    <div class="flex gap-4"><i class="fas fa-anchor text-blue-600 text-xl"></i><p class="text-[10px] font-bold uppercase italic text-slate-600 leading-tight"><b>Ancoragem:</b> Fixação profissional com estacas ou pesos de alta densidade.</p></div>
+                    <div class="flex gap-4"><i class="fas fa-user-shield text-blue-600 text-xl"></i><p class="text-[10px] font-bold uppercase italic text-slate-600 leading-tight"><b>Supervisão:</b> É obrigatória a presença de um adulto responsável no local.</p></div>
+                    <div class="flex gap-4"><i class="fas fa-exclamation-triangle text-blue-600 text-xl"></i><p class="text-[10px] font-bold uppercase italic text-slate-600 leading-tight"><b>Restrições:</b> Proibido calçado, óculos, comida ou animais no interior.</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div x-show="showTermos" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" @click.away="showTermos = false">
+        <div class="bg-white p-6 rounded-3xl max-w-sm w-full italic text-[10px] uppercase font-bold text-slate-700 max-h-[80vh] overflow-y-auto">
+            <h2 class="text-xl font-black text-blue-600 mb-4 uppercase text-center">Condições Detalhadas</h2>
+            <div class="space-y-4">
+                <p>1. Supervisão constante de um adulto é obrigatória.</p>
+                <p>2. Proibido o uso de calçado, óculos ou objetos pontiagudos.</p>
+                <p>3. Proibido consumir comida ou bebida no interior.</p>
+                <p>4. Em ventos > 38km/h ou chuva, o serviço será suspenso por motivos de segurança.</p>
+                <p>5. Caução de 30% não reembolsável se cancelado com menos de 48h de antecedência.</p>
+                <p>6. Local deve ser plano e livre de detritos.</p>
+                <p>7. Equipamento certificado EN 14960.</p>
+            </div>
+            <button @click="showTermos = false" class="mt-8 w-full py-4 bg-blue-600 text-white rounded-2xl font-black tracking-widest">FECHAR E ACEITAR</button>
+        </div>
+    </div>
+
+    <footer class="fixed bottom-0 left-0 right-0 p-4 glass border-t border-slate-200 text-center z-40">
+        <p class="text-[7px] font-bold text-slate-300 uppercase tracking-widest italic">© 2026 Air4Fun Madeira | Diversão Segura</p>
+    </footer>
+</body>
+</html>
