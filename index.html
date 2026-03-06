@@ -51,56 +51,36 @@
                 </div>
             </div>
 
-         <section class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 mb-6 text-center">
+         <section class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 mb-6 text-center" x-data="calendarApp()" x-init="init()">
+  <h3 class="font-black text-slate-800 text-sm uppercase italic mb-4"> 📅 Consulta de Datas </h3>
 
-<h3 class="font-black text-slate-800 text-sm uppercase italic mb-4">
-📅 Consulta de Datas
-</h3>
+  <div class="flex justify-between items-center mb-2">
+    <button @click="prevMonth()" class="p-2 bg-white rounded shadow"><i class="fas fa-chevron-left"></i></button>
+    <h4 class="font-black text-xs uppercase text-slate-700">{{ monthNames[month] }} {{ year }}</h4>
+    <button @click="nextMonth()" class="p-2 bg-white rounded shadow"><i class="fas fa-chevron-right"></i></button>
+  </div>
 
-<div class="bg-slate-50 rounded-2xl p-4">
+  <!-- Dias da semana -->
+  <div class="grid grid-cols-7 text-[10px] font-bold text-slate-400 mb-2">
+    <div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SAB</div><div>DOM</div>
+  </div>
 
-<div class="flex justify-between items-center mb-4">
+  <!-- Calendário -->
+  <div class="grid grid-cols-7 gap-2">
+    <template x-for="(day, index) in calendarDays" :key="index">
+      <div 
+        @click="selectDate(day)"
+        x-text="day.getDate()"
+        :class="dayClass(day)"
+        class="h-10 flex items-center justify-center rounded-lg cursor-pointer transition-all relative">
+      </div>
+    </template>
+  </div>
 
-<button onclick="mesAnterior()" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow">
-<i class="fas fa-chevron-left text-xs"></i>
-</button>
-
-<h4 id="mesAtual" class="font-black text-xs uppercase text-slate-700"></h4>
-
-<button onclick="mesSeguinte()" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow">
-<i class="fas fa-chevron-right text-xs"></i>
-</button>
-
-</div>
-
-<div class="grid grid-cols-7 text-[9px] font-bold text-slate-400 mb-2">
-<div>SEG</div>
-<div>TER</div>
-<div>QUA</div>
-<div>QUI</div>
-<div>SEX</div>
-<div>SAB</div>
-<div>DOM</div>
-</div>
-
-<div id="calendar" class="grid grid-cols-7 gap-2 text-[10px] font-bold"></div>
-
-<div class="flex justify-center gap-6 mt-4 text-[9px] font-bold uppercase text-slate-500">
-
-<div class="flex items-center gap-2">
-<div class="w-3 h-3 rounded-full bg-green-400"></div>
-<span>Livres</span>
-</div>
-
-<div class="flex items-center gap-2">
-<div class="w-3 h-3 rounded-full bg-red-400"></div>
-<span>Ocupado</span>
-</div>
-
-</div>
-
-</div>
-
+  <!-- Data selecionada -->
+  <div class="mt-4 text-center text-sm font-bold">
+    <span x-text="selectedDate ? 'Data escolhida: ' + selectedDate.toLocaleDateString() : 'Escolha uma data'"></span>
+  </div>
 </section>
             <section class="bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl text-white relative overflow-hidden" x-data="{ enviado: false, loading: false }">
                 <h3 class="text-xl font-black italic uppercase mb-6">Registo de Contrato</h3>
@@ -182,77 +162,94 @@
     <footer class="fixed bottom-0 left-0 right-0 p-4 glass border-t border-slate-200 text-center z-40">
         <p class="text-[7px] font-bold text-slate-300 uppercase tracking-widest italic">© 2026 Air4Fun Madeira | Diversão Segura</p>
     </footer>
-  <script>
+ <script>
+function calendarApp() {
+  return {
+    year: new Date().getFullYear(),
+    month: new Date().getMonth(),
+    selectedDate: null,
+    today: new Date(),
+    reservas: [],
+    monthNames: ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"],
+    
+    async init() {
+      await this.fetchReservas();
+      this.generateCalendar();
+    },
 
-let dataAtual = new Date()
+    async fetchReservas() {
+      const CALENDAR_ID = 'd8748e0060bbd7d2c3b2959966e88d527eee326c36e172dc160190166907c11e@group.calendar.google.com';
+      const API_KEY = ''AIzaSyCjf_GoY2Fdk8MEkJfkPDKi3b3XN9cZ9gc';
+      try {
+        const res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}`);
+        const data = await res.json();
+        this.reservas = data.items.map(ev => ev.start.date || ev.start.dateTime.split('T')[0]);
+      } catch(e) {
+        console.error('Erro ao buscar reservas', e);
+      }
+    },
 
-const reservas = [
-"2026-03-10",
-"2026-03-15",
-"2026-03-21"
-]
+    generateCalendar() {
+      const firstDay = new Date(this.year, this.month, 1).getDay();
+      const daysInMonth = new Date(this.year, this.month + 1, 0).getDate();
+      let start = firstDay === 0 ? 6 : firstDay - 1;
 
-function gerarCalendario(){
+      this.calendarDays = [];
+      for(let i = 0; i < start; i++) this.calendarDays.push(new Date(this.year, this.month, 0)); // espaços vazios
 
-const calendar = document.getElementById("calendar")
-calendar.innerHTML=""
+      for(let d = 1; d <= daysInMonth; d++) {
+        this.calendarDays.push(new Date(this.year, this.month, d));
+      }
+    },
 
-const ano = dataAtual.getFullYear()
-const mes = dataAtual.getMonth()
+    prevMonth() {
+      this.month--;
+      if(this.month < 0) { this.month = 11; this.year--; }
+      this.generateCalendar();
+    },
 
-const primeiroDia = new Date(ano, mes, 1).getDay()
-const diasMes = new Date(ano, mes+1, 0).getDate()
+    nextMonth() {
+      this.month++;
+      if(this.month > 11) { this.month = 0; this.year++; }
+      this.generateCalendar();
+    },
 
-const meses = [
-"Janeiro","Fevereiro","Março","Abril","Maio","Junho",
-"Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
-]
+    isReserved(day) {
+      const dateStr = day.toISOString().split('T')[0];
+      return this.reservas.includes(dateStr);
+    },
 
-document.getElementById("mesAtual").innerText =
-meses[mes] + " " + ano
+    isToday(day) {
+      return day.toDateString() === this.today.toDateString();
+    },
 
-let start = primeiroDia === 0 ? 6 : primeiroDia-1
+    selectDate(day) {
+      if(!this.isReserved(day) && day.getMonth() === this.month) {
+        this.selectedDate = day;
+      }
+    },
 
-for(let i=0;i<start;i++){
-calendar.innerHTML += `<div></div>`
+    dayClass(day) {
+      let classes = [];
+      if(day.getMonth() !== this.month) classes.push('text-slate-300 cursor-default');
+      else if(this.isReserved(day)) classes.push('bg-red-200 text-red-500 cursor-not-allowed');
+      else classes.push('bg-green-100 text-green-600');
+
+      if(this.isToday(day)) classes.push('ring-2 ring-blue-400');
+
+      if(this.selectedDate && this.selectedDate.toDateString() === day.toDateString()) {
+        classes.push('bg-blue-600 text-white');
+      }
+
+      return classes.join(' ');
+    }
+  }
 }
-
-for(let dia=1;dia<=diasMes;dia++){
-
-const data =
-`${ano}-${String(mes+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`
-
-const ocupado = reservas.includes(data)
-
-calendar.innerHTML += `
-<div class="
-h-9 flex items-center justify-center rounded-lg
-${ocupado ? 'bg-red-100 text-red-500' : 'bg-green-100 text-green-600'}
-">
-${dia}
-</div>
-`
-
-}
-
-}
-
-function mesAnterior(){
-dataAtual.setMonth(dataAtual.getMonth()-1)
-gerarCalendario()
-}
-
-function mesSeguinte(){
-dataAtual.setMonth(dataAtual.getMonth()+1)
-gerarCalendario()
-}
-
-gerarCalendario()
-
 </script>
 </body>
 
 </html>
+
 
 
 
