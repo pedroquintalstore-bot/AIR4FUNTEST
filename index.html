@@ -179,7 +179,7 @@ function calendarApp() {
 
     async fetchReservas() {
       const CALENDAR_ID = 'd8748e0060bbd7d2c3b2959966e88d527eee326c36e172dc160190166907c11e@group.calendar.google.com';
-      const API_KEY = ''AIzaSyCjf_GoY2Fdk8MEkJfkPDKi3b3XN9cZ9gc';
+      const API_KEY = 'AIzaSyCjf_GoY2Fdk8MEkJfkPDKi3b3XN9cZ9gc';
       try {
         const res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}`);
         const data = await res.json();
@@ -249,6 +249,7 @@ function calendarApp() {
 </body>
 
 </html>
+
 
 
 
